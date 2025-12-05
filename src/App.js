@@ -27,6 +27,12 @@ function ProductTable({ products, filterText, inStockOnly }) {
   let lastCategory = null;
 
   products.forEach((product) => {
+    if (product.name.toLowerCase().indexOf(filterText.toLowerCase()) === -1) {
+      return;
+    }
+    if (inStockOnly && !product.stocked) {
+      return;
+    }
     if (product.category !== lastCategory) {
       rows.push(
         <ProductCategoryRow
@@ -46,18 +52,32 @@ function ProductTable({ products, filterText, inStockOnly }) {
           <th>Name</th>
           <th>Price</th>
         </tr>
-        <tbody>{rows}</tbody>
       </thead>
+      <tbody>{rows}</tbody>
     </table>
   );
 }
-function SearchBar({ filterText, inStockOnly }) {
+function SearchBar({
+  filterText,
+  inStockOnly,
+  onFilterTextChange,
+  onInStockOnlyChange,
+}) {
   return (
     <form>
-      <input type="text" value={filterText} placeholder="Search..." />
+      <input
+        type="text"
+        value={filterText}
+        onChange={(e) => onFilterTextChange(e.target.value)}
+        placeholder="Search..."
+      />
       <label>
-        <input type="checkbox" checked={inStockOnly} /> Only show products in
-        stock
+        <input
+          type="checkbox"
+          checked={inStockOnly}
+          onChange={(e) => onInStockOnlyChange(e.target.checked)}
+        />{" "}
+        Only show products in stock
       </label>
     </form>
   );
@@ -68,7 +88,12 @@ function FilterableProductTable({ products }) {
   const [inStockOnly, setInStockOnly] = useState(false);
   return (
     <div>
-      <SearchBar filterText={filterText} inStockOnly={inStockOnly} />
+      <SearchBar
+        filterText={filterText}
+        inStockOnly={inStockOnly}
+        onFilterTextChange={setFilterText}
+        onInStockOnlyChange={setInStockOnly}
+      />
       <ProductTable
         products={products}
         filterText={filterText}
